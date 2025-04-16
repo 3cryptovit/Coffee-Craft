@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.routes';
 import ingredientsRoutes from './routes/ingredients.routes';
 import ordersRoutes from './routes/orders.routes';
 import shopRoutes from './routes/shops';
+import cupsRoutes from './routes/cups.routes';
 
 dotenv.config();
 
@@ -19,10 +20,11 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/auth', authRoutes);
-app.use('/ingredients', ingredientsRoutes);
-app.use('/orders', ordersRoutes);
-app.use('/shops', shopRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/ingredients', ingredientsRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api/shops', shopRoutes);
+app.use('/api/cups', cupsRoutes);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -30,7 +32,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(500).json({ error: 'Что-то пошло не так!' });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);

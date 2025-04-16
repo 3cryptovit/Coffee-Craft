@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="92" viewBox="0 0 80 92" fill="none">
+  <!-- Крышка -->
+  <rect x="15" y="0" width="50" height="10" rx="3" fill="#333" />
+  <!-- Горловина -->
+  <rect x="13" y="10" width="54" height="6" rx="2" fill="#555" />
+  <!-- Контур стакана -->
+  <path d="M15 16 L22 90 M65 16 L58 90" stroke="#000" stroke-width="3" />
+  <line x1="22" y1="90" x2="58" y2="90" stroke="#000" stroke-width="3" />
+</svg>
