@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  BARISTA
+  OWNER
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum IngredientStage {
+  BASE
+  TOPPING
+  DECORATION
+}
+
+enum IngredientType {
+  COFFEE
+  MILK
+  SYRUP
+  TOPPING
+  DECORATION
+}
+
+model CoffeeShop {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String?
+  is_active Boolean  @default(true)
+
+  users     User[]
+  orders    Order[]
+  inventory Inventory[]
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
+  email      String?  @unique
+  phone      String?
+  password   String
+  role       Role     @default(BARISTA)
+  is_active  Boolean  @default(true)
+  shopId     Int?
+  shop       CoffeeShop? @relation(fields: [shopId], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  last_login DateTime?
+
+  orders     Order[]
+}
+
+model Cup {
+  id         Int     @id @default(autoincrement())
+  label      String
+  volume_ml  Int
+  price_base Float
+
+  orders     Order[]
+  recipes    Recipe[]
+}
+
+model IngredientCategory {
+  id         Int     @id @default(autoincrement())
+  name       String
+  orderIndex Int
+
+  ingredients Ingredient[]
+}
+
+model RoastLevel {
+  id          Int         @id @default(autoincrement())
+  name        String
+  ingredients Ingredient[] @relation("IngredientRoasts")
+}
+
+model Origin {
+  id          Int         @id @default(autoincrement())
+  country     String
+  ingredients Ingredient[] @relation("IngredientOrigins")
+}
+
+model Ingredient {
+  id           Int     @id @default(autoincrement())
+  name         String
+  categoryId   Int
+  sub_category String?
+  volume_ml    Int
+  price        Float
+  available    Boolean @default(true)
+  image_url    String?
+  max_units    Int
+  type         IngredientType @default(COFFEE)
+  roastLevels  RoastLevel[]   @relation("IngredientRoasts")
+  origins      Origin[]       @relation("IngredientOrigins")
+
+  category     IngredientCategory @relation(fields: [categoryId], references: [id])
+  orderItems   OrderItem[]
+  inventory    Inventory[]
+  recipeLinks  RecipeIngredient[]
+}
+
+model Order {
+  id           Int     @id @default(autoincrement())
+  userId       Int?    // пользователь, оформивший заказ
+  shopId       Int
+  cupId        Int
+  total_volume Int
+  total_price  Float
+  status       String   // 'pending', 'in_progress', 'ready', 'completed'
+  created_at   DateTime @default(now())
+  qr_hash      String   @unique
+
+  user         User?       @relation(fields: [userId], references: [id])
+  shop         CoffeeShop  @relation(fields: [shopId], references: [id])
+  cup          Cup         @relation(fields: [cupId], references: [id])
+  items        OrderItem[]
+}
+
+model OrderItem {
+  id            Int     @id @default(autoincrement())
+  orderId       Int
+  ingredientId  Int
+  quantity      Int
+  added_stage   String
+  temperature   String
+  notes         String?
+
+  order         Order      @relation(fields: [orderId], references: [id])
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id])
+}
+
+model Recipe {
+  id         Int     @id @default(autoincrement())
+  name       String
+  cupId      Int
+  price      Float
+  image_url  String?
+
+  cup        Cup              @relation(fields: [cupId], references: [id])
+  ingredients RecipeIngredient[]
+}
+
+model RecipeIngredient {
+  id           Int     @id @default(autoincrement())
+  recipeId     Int
+  ingredientId Int
+  quantity     Int
+
+  recipe       Recipe     @relation(fields: [recipeId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+}
+
+model Inventory {
+  id           Int     @id @default(autoincrement())
+  shopId       Int
+  ingredientId Int
+  in_stock     Boolean @default(true)
+  amount       Int
+
+  shop         CoffeeShop @relation(fields: [shopId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@unique([shopId, ingredientId])
+}

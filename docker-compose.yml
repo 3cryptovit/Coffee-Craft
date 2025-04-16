@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    container_name: coffee_postgres
+    environment:
+      POSTGRES_DB: coffeecraft_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Koteyka_24_17
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    restart: always
+    container_name: coffee_backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+    environment:
+      DATABASE_URL: postgresql://postgres:Koteyka_24_17@postgres:5432/coffeecraft_db
+      JWT_SECRET: Koteyka_24_17
+      PORT: 3000
+    depends_on:
+      - postgres
+
+  frontend:  # ✅ теперь внутри services
+    build:
+      context: ./frontend
+    container_name: coffeecraft_frontend
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
